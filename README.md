@@ -1,56 +1,135 @@
-# YouTube-Sentiment-Insights
+# YouTube Sentiment Insights
+
+An end-to-end MLOps pipeline for Sentiment Analysis on social media comments. This project implements a **Stacking Ensemble Classifier** (LightGBM + Logistic Regression + KNN) to categorize text into **Positive**, **Neutral**, or **Negative** sentiments. It features a fully reproducible pipeline managed by DVC (Data Version Control), integrating advanced text preprocessing and TF-IDF featurization.
+
+## Table of Contents
+- [Prerequisites](#prerequisites)
+- [Installation & Setup](#installation--setup)
+- [Project Architecture](#project-architecture)
+- [Running the Pipeline](#running-the-pipeline)
+- [Pipeline Stages](#pipeline-stages)
+- [Results](#results)
+
+---
 
 ## Prerequisites
-- Python 3.12+ (tested on Windows with Python 3.12.7)
 
-### Microsoft C++ Build Tools (required for some packages)
-Some dependencies (e.g., `ruamel.yaml.clibz` pulled by DVC) may require compilation on Windows.
-- install: Visual Studio Build Tools 2022
+* **Python 3.12+** (Tested on Windows 11 with Python 3.12.7)
+* **Microsoft C++ Build Tools**: Required for compiling specific Python dependencies (e.g., `ruamel.yaml` used by DVC).
+    * *Install "Desktop development with C++" via Visual Studio Build Tools 2022.*
 
-## Setup (Windows / Command Prompt)
-:: 1) Create venv
+---
+
+## Installation & Setup
+
+These instructions are for **Windows (Command Prompt / PowerShell)**.
+
+### 1. Environment Setup
+Create and activate a virtual environment to keep dependencies isolated.
+
+:: Create virtual environment
 py -3.12 -m venv .venv
 
-:: 2) Activate
+:: Activate the environment
 .\.venv\Scripts\activate
 
-:: 3) Upgrade pip tools
+### 2. Install Dependencies
+Update your package tools and install the required libraries.
+:: Upgrade core tools
 python -m pip install --upgrade pip setuptools wheel
 
-:: 4) Install deps
+:: Install project requirements
 pip install -r requirements.txt
 
-:: 5) (If you have -e . in requirements, this installs your package too)
+---
 
-
-## Initialize DVC
-dvc init
-
-dvc repro
-
-dvc dag
-
-
-## AWS
- 
-aws configure
-
-## Project Structure Tree
+## Project Architecture
 project_root/
-├── params.yaml              # Your configuration file
-├── dvc.yaml                 # If you are using DVC pipelines
-├── data/
-│   ├── raw/                 # Original raw_dataset.csv
-│   └── processed/           # train.csv, test.csv
-├── src/
-│   ├── __init__.py
-│   ├── data/                # <--- YOUR CURRENT FOCUS
-│   │   ├── __init__.py
-│   │   ├── data_ingestion.py    # Loads CSV, splits Train/Test, saves to disk
-│   │   └── data_preprocessing.py # Text cleaning (regex, lemmatization, stop words)
+├── data/                       # Data Store
+│   ├── raw/                    # Original immutable datasets
+│   ├── ingested/               # Split datasets (train.csv, test.csv)
+│   └── processed/              # Cleaned text & TF-IDF matrices (.pkl)
+│
+├── models/                     # Model Registry (Artifacts)
+│   └── stacking_model.pkl      # The trained Stacking Ensemble model
+│
+├── src/                        # Source Code
+│   ├── data/
+│   │   ├── data_ingestion.py   # Loads raw data, splits Train/Test
+│   │   └── data_preprocessing.py # Cleaning, Lemmatization, Stopwords
 │   ├── features/
-│   │   ├── __init__.py
-│   │   └── build_features.py    # TF-IDF Vectorization logic
+│   │   └── build_features.py   # TF-IDF Vectorization (Trigrams, 10k features)
 │   └── models/
-│       ├── __init__.py
-│       └── train_model.py       # Stacking Ensemble l
+│       ├── train_model.py      # Stacking Ensemble training logic
+│       └── evaluate_model.py   # Metrics calculation (Accuracy, F1)
+│
+├── dvc.yaml                    # DVC Pipeline Definitions
+├── params.yaml                 # Central Configuration (Hyperparameters)
+└── metrics.json                # Model Performance Metrics
+
+---
+
+## Running the Pipeline
+This project uses DVC (Data Version Control) to manage the ML pipeline.
+
+1. Initialize (First Run Only)
+If you are setting this up for the first time:
+
+    * dvc init
+
+2. Reproduce Pipeline
+Run the entire end-to-end workflow (Ingestion → Preprocessing → Training → Evaluation). DVC will only run stages that have changed.
+
+    * dvc repro
+
+3. View Metrics
+Check the performance of the trained model.
+
+    * dvc metrics show
+
+---
+
+## Pipeline Stages
+1. Ingestion:
+
+    - Loads raw Reddit/YouTube data.
+
+    - Splits into Training (80%) and Testing (20%) sets using stratified sampling.
+
+2. Preprocessing:
+
+    - Cleaning: Regex removal of HTML tags, URLs, and punctuation.
+
+    - Normalization: NLTK-based Lemmatization and custom Stopword removal.
+
+3. Featurization:
+
+    - TF-IDF Vectorizer: Generates 10,000 features.
+
+    - N-Grams: Uses Unigrams, Bigrams, and Trigrams (1,3) to capture context.
+
+4. Training:
+
+    - Algorithm: Stacking Ensemble Classifier.
+
+    - Base Learners: LightGBM (Gradient Boosting) + Logistic Regression (Balanced).
+
+    - Meta Learner: K-Nearest Neighbors (KNN).
+
+5. Evaluation:
+
+    - Calculates Accuracy, Precision, Recall, and F1-Score (Weighted).
+
+---
+
+## Results
+Current Champion Model Performance on Test Data:
+
+Metric	    Score
+
+Accuracy	  86.82%
+F1 Score	  86.71%
+Precision	  86.76%
+Recall	    86.82%
+
+*Note: Metrics are tracked automatically in metrics.json via DVC.*

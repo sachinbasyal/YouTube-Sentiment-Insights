@@ -66,3 +66,90 @@ stages:
       hash: md5
       md5: 710cc8e8f808f93e004b1a46960615fe
       size: 4146117
+  build_features:
+    cmd: python src/features/build_features.py --config params.yaml
+    deps:
+    - path: data/processed/test_clean.csv
+      hash: md5
+      md5: f6d8e95611345104cabf0e6a8d61af3f
+      size: 1039534
+    - path: data/processed/train_clean.csv
+      hash: md5
+      md5: 710cc8e8f808f93e004b1a46960615fe
+      size: 4146117
+    - path: src/features/build_features.py
+      hash: md5
+      md5: 4210cd4fa3e24eeaf27ba8277ae9011d
+      size: 3487
+    params:
+      params.yaml:
+        build_features.max_features: 10000
+        build_features.ngram_range:
+        - 1
+        - 3
+    outs:
+    - path: data/processed/test_features.pkl
+      hash: md5
+      md5: 3842e075f99d8bfe759f0d074160dbd4
+      size: 1496647
+    - path: data/processed/tfidf_vectorizer.pkl
+      hash: md5
+      md5: 102e2c986827b8041f9716b29c89052d
+      size: 383904
+    - path: data/processed/train_features.pkl
+      hash: md5
+      md5: 450c122443f7c0f03fbb35b812f7d87d
+      size: 6091058
+  train_model:
+    cmd: python src/models/train_model.py --config params.yaml
+    deps:
+    - path: data/processed/train_features.pkl
+      hash: md5
+      md5: 450c122443f7c0f03fbb35b812f7d87d
+      size: 6091058
+    - path: src/models/train_model.py
+      hash: md5
+      md5: 1ea7a69d8a8df78ed64b81a64b10920b
+      size: 3581
+    params:
+      params.yaml:
+        model_params.base_model_lgbm:
+          learning_rate: 0.08
+          max_depth: 20
+          n_estimators: 367
+          class_weight: balanced
+          objective: multiclass
+          metric: multi_logloss
+          num_class: 3
+        model_params.base_model_logreg:
+          max_iter: 1000
+          solver: lbfgs
+          class_weight: balanced
+        model_params.meta_model_knn:
+          n_neighbors: 5
+          metric: minkowski
+    outs:
+    - path: models/stacking_model.pkl
+      hash: md5
+      md5: 5a896021ecc7a91709991fcc8642dd0a
+      size: 6897020
+  evaluate_model:
+    cmd: python src/models/evaluate_model.py --config params.yaml
+    deps:
+    - path: data/processed/test_features.pkl
+      hash: md5
+      md5: 3842e075f99d8bfe759f0d074160dbd4
+      size: 1496647
+    - path: models/stacking_model.pkl
+      hash: md5
+      md5: 5a896021ecc7a91709991fcc8642dd0a
+      size: 6897020
+    - path: src/models/evaluate_model.py
+      hash: md5
+      md5: 7f5f99ba3024878452bc93a6efa7d4a7
+      size: 2553
+    outs:
+    - path: metrics.json
+      hash: md5
+      md5: 428ec9df8a526053b1f9367ca53629b1
+      size: 150

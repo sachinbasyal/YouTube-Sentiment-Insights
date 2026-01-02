@@ -2,3 +2,6 @@
 /test.csv
 /train_clean.csv
 /test_clean.csv
+/train_features.pkl
+/test_features.pkl
+/tfidf_vectorizer.pkl
