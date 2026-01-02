@@ -1,0 +1,53 @@
+data_ingestion:
+  source_path: "data/raw/Reddit_Data.csv"
+  processed_dir: "data/processed"  # Added for output storage
+  test_size: 0.20
+  random_state: 42
+  # Critical mapping from Exp 05/06: {-1 (Negative) -> 2, 0 (Neutral) -> 0, 1 (Positive) -> 1}
+  # This ensures classes are 0, 1, 2 for the multiclass objective
+  target_mapping: 
+    -1: 2
+    0: 0
+    1: 1
+  num_classes: 3 
+
+preprocessing:
+  input_train_file: "train.csv"
+  input_test_file: "test.csv"
+  output_train_file: "train_clean.csv"
+  output_test_file: "test_clean.csv"
+  remove_html: true
+  remove_urls: true
+  lower_case: true
+  # We perform stemming/lemmatization here or let TF-IDF handle basics. 
+  # For now, let's stick to basic noise removal.
+
+vectorization:
+  max_features: 10000
+  ngram_min: 1
+  ngram_max: 3
+
+# --- STACKING ENSEMBLE CONFIGURATION ---
+model_params:
+  base_model_lgbm:
+    learning_rate: 0.08
+    max_depth: 20
+    n_estimators: 367
+    class_weight: "balanced"
+    objective: "multiclass"
+    metric: "multi_logloss"
+    num_class: 3
+  
+  base_model_logreg:
+    max_iter: 1000
+    solver: "lbfgs"
+    class_weight: "balanced"
+    multi_class: "multinomial"
+
+  meta_model_knn:
+    n_neighbors: 5
+    metric: "minkowski"
+
+  stacking_config:
+    cv: 5
+    n_jobs: -1

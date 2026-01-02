@@ -205,3 +205,6 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Python package metadata created by pip (e.g., from `pip install -e .`)
+*.egg-info/
