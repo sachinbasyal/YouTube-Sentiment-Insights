@@ -1,16 +1,18 @@
-# YouTube Sentiment Insights
+# Social Sentiment MLOps Pipeline (Core Engine)
 
-An end-to-end MLOps pipeline for Sentiment Analysis on social media comments. This project implements a **Stacking Ensemble Classifier** (LightGBM + Logistic Regression + KNN) to categorize text into **Positive**, **Neutral**, or **Negative** sentiments. It features a fully reproducible pipeline managed by DVC (Data Version Control), integrating advanced text preprocessing and TF-IDF featurization.
+An end-to-end MLOps project implementing a **Stacking Ensemble Classifier** (LightGBM + Logistic Regression + KNN) to predict sentiment in social media comments. While currently trained on Reddit data, this engine is designed as the core processing unit for a broader YouTube/Social media insight system.
+
+This project demonstrates a production-ready workflow using **DVC (Data Version Control)** for reproducibility, **NLTK** for advanced text processing, and a modular architecture.
 
 ## Table of Contents
 - [Prerequisites](#prerequisites)
 - [Installation & Setup](#installation--setup)
 - [Project Architecture](#project-architecture)
 - [Running the Pipeline](#running-the-pipeline)
+- [Inference & Prediction](#inference--prediction)
 - [Pipeline Stages](#pipeline-stages)
 - [Results](#results)
 
----
 
 ## Prerequisites
 
@@ -18,7 +20,6 @@ An end-to-end MLOps pipeline for Sentiment Analysis on social media comments. Th
 * **Microsoft C++ Build Tools**: Required for compiling specific Python dependencies (e.g., `ruamel.yaml` used by DVC).
     * *Install "Desktop development with C++" via Visual Studio Build Tools 2022.*
 
----
 
 ## Installation & Setup
 
@@ -46,7 +47,6 @@ Update your package tools and install the required libraries.
 
     - pip install -r requirements.txt
 
----
 
 ## Project Architecture
 
@@ -80,7 +80,6 @@ Update your package tools and install the required libraries.
     ├── params.yaml                     # Central Configuration (Hyperparameters)
     └── metrics.json                    # Model Performance Metrics
 
----
 
 ## Running the Pipeline
 This project uses DVC (Data Version Control) to manage the ML pipeline.
@@ -104,7 +103,22 @@ Check the performance of the trained model.
 
     * dvc metrics show
 
----
+
+## Inference & Prediction
+Once the pipeline has run and the model is trained, you can use the predictor script to classify new text.
+
+**Interactive Mode**
+
+Launch a chat-like interface to test sentences rapidly.
+
+    python src/prediction/predict_model.py
+*Type "exit" to quit.*
+
+**Single Command Mode**
+
+Pass a string directly via the command line.
+
+    python src/prediction/predict_model.py --text "This end-to-end MLOps project was incredibly helpful!"
 
 ## Pipeline Stages
 1. Ingestion:
@@ -137,7 +151,6 @@ Check the performance of the trained model.
 
     - Calculates Accuracy, Precision, Recall, and F1-Score (Weighted).
 
----
 
 ## Results
 Current Champion Model Performance on Test Data:
