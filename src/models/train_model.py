@@ -4,12 +4,17 @@ import argparse
 import os
 import pickle
 import pandas as pd
+import warnings
+# Ignore feature name warnings from LightGBM/Sklearn
+warnings.filterwarnings("ignore", message="X does not have valid feature names")
+warnings.filterwarnings("ignore", category=UserWarning, module='lightgbm')
 
 # Import Models
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier
 from lightgbm import LGBMClassifier
 from sklearn.ensemble import StackingClassifier
+
 
 # Logging config
 logging.basicConfig(

@@ -109,8 +109,8 @@ stages:
       size: 6091058
     - path: src/models/train_model.py
       hash: md5
-      md5: 1ea7a69d8a8df78ed64b81a64b10920b
-      size: 3581
+      md5: 0673225a6d3d74c5cf0cdecd7ec1e8a6
+      size: 3812
     params:
       params.yaml:
         model_params.base_model_lgbm:

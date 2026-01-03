@@ -28,44 +28,57 @@ These instructions are for **Windows (Command Prompt / PowerShell)**.
 Create and activate a virtual environment to keep dependencies isolated.
 
 :: Create virtual environment
-py -3.12 -m venv .venv
+
+    - py -3.12 -m venv .venv
 
 :: Activate the environment
-.\.venv\Scripts\activate
+
+    - .\.venv\Scripts\activate
 
 ### 2. Install Dependencies
 Update your package tools and install the required libraries.
-:: Upgrade core tools
-python -m pip install --upgrade pip setuptools wheel
+
+:: Upgrade core 
+
+    - python -m pip install --upgrade pip setuptools wheel
 
 :: Install project requirements
-pip install -r requirements.txt
+
+    - pip install -r requirements.txt
 
 ---
 
 ## Project Architecture
-project_root/
-├── data/                       # Data Store
-│   ├── raw/                    # Original immutable datasets
-│   ├── ingested/               # Split datasets (train.csv, test.csv)
-│   └── processed/              # Cleaned text & TF-IDF matrices (.pkl)
-│
-├── models/                     # Model Registry (Artifacts)
-│   └── stacking_model.pkl      # The trained Stacking Ensemble model
-│
-├── src/                        # Source Code
-│   ├── data/
-│   │   ├── data_ingestion.py   # Loads raw data, splits Train/Test
-│   │   └── data_preprocessing.py # Cleaning, Lemmatization, Stopwords
-│   ├── features/
-│   │   └── build_features.py   # TF-IDF Vectorization (Trigrams, 10k features)
-│   └── models/
-│       ├── train_model.py      # Stacking Ensemble training logic
-│       └── evaluate_model.py   # Metrics calculation (Accuracy, F1)
-│
-├── dvc.yaml                    # DVC Pipeline Definitions
-├── params.yaml                 # Central Configuration (Hyperparameters)
-└── metrics.json                # Model Performance Metrics
+
+    ├── data/                           # Data Store
+    │   ├── raw/                        # Original immutable datasets
+    │   ├── ingested/                   # Split datasets (train.csv, test.csv)
+    │   └── processed/                  # Cleaned text & TF-IDF matrices (.pkl)
+    │
+    ├── models/                         # Model Registry (Artifacts)
+    │   └── stacking_model.pkl          # The trained Stacking Ensemble model
+    │
+    ├── src/                            # Source Code
+    |   ├── __init__.py                 <-- REQUIRED
+    │   ├── data/
+    |   |   ├── __init__.py             <-- REQUIRED (Allows: from src.data import ...)
+    │   │   ├── data_ingestion.py       # Loads raw data, splits Train/Test
+    │   │   └── data_preprocessing.py   # Cleaning, Lemmatization, Stopwords
+    │   ├── features/
+    │   │   ├── __init__.py             <-- REQUIRED (Allows: from src.features import ...)
+    │   │   └── build_features.py       # TF-IDF Vectorization (Trigrams, 10k features)
+    │   └── models/
+    │   |    ├── __init__.py            <-- REQUIRED (Allows: from src.models import ...)
+    │   |    ├── train_model.py         # Stacking Ensemble training logic
+    │   |    └── evaluate_model.py      # Metrics calculation (Accuracy, F1)
+    |   | 
+    |   └── prediction/
+    |        ├── __init__.py            <-- REQUIRED (Allows: from src.prediction import ...)
+    |        └── predict_model.py
+    │
+    ├── dvc.yaml                        # DVC Pipeline Definitions
+    ├── params.yaml                     # Central Configuration (Hyperparameters)
+    └── metrics.json                    # Model Performance Metrics
 
 ---
 
@@ -75,6 +88,7 @@ This project uses DVC (Data Version Control) to manage the ML pipeline.
 1. Initialize (First Run Only)
 If you are setting this up for the first time:
 
+    * git init  (git bash)
     * dvc init
 
 2. Reproduce Pipeline
@@ -82,7 +96,10 @@ Run the entire end-to-end workflow (Ingestion → Preprocessing → Training →
 
     * dvc repro
 
-3. View Metrics
+3. DVC Diagram (Pipelines)
+* dvc dag
+
+4. View Metrics
 Check the performance of the trained model.
 
     * dvc metrics show
@@ -125,11 +142,10 @@ Check the performance of the trained model.
 ## Results
 Current Champion Model Performance on Test Data:
 
-Metric	    Score
-
-Accuracy	  86.82%
-F1 Score	  86.71%
-Precision	  86.76%
-Recall	    86.82%
+    Metric 	      Score
+    Accuracy	  86.82%
+    F1 Score	  86.71%
+    Precision	  86.76%
+    Recall	      86.82%
 
 *Note: Metrics are tracked automatically in metrics.json via DVC.*
